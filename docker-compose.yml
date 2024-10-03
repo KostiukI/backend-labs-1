@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: ./laravel-docker-app
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    volumes:
+      - ./laravel-docker-app:/var/www
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel-network
+
+  web:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./laravel-docker-app/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+      - nest
+      - django
+    networks:
+      - laravel-network
+
+  nest:
+    build:
+      context: ./nest-app
+      dockerfile: Dockerfile
+    volumes:
+      - ./nest-app:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - laravel-network
+
+  django:
+    build:
+      context: ./django-app
+      dockerfile: Dockerfile
+    volumes:
+      - ./django-app:/usr/src/app
+    ports:
+      - "8000:8000"
+    networks:
+      - laravel-network
+
+networks:
+  laravel-network:
+    driver: bridge
